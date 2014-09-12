@@ -20,7 +20,7 @@ object Build extends Build {
       version             := "0.1.0",
       scalaVersion        := "2.11.2",
       licenses            += ("MIT", url("http://opensource.org/licenses/MIT")),
-      resolvers           += "Plasma Conduit Repository" at "http://dl.bintray.com/blackboxsociety/releases",
+      resolvers           += "Plasma Conduit Repository" at "http://dl.bintray.com/plasmaconduit/releases",
       libraryDependencies += "com.plasmaconduit" %% "json" % "0.2.0",
       libraryDependencies += "com.plasmaconduit" %% "jwa" % "0.1.0"
     )
