@@ -1,6 +1,6 @@
 package com.plasmaconduit.jws
 
-import com.blackboxsociety.json._
+import com.plasmaconduit.json._
 import com.plasmaconduit.jwa._
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
