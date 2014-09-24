@@ -4,6 +4,8 @@ import com.plasmaconduit.json._
 import com.plasmaconduit.jwa._
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
+import scala.util.{Try, Success, Failure}
+
 final case class JSONWebSignature(alg: DigitalSignatureOrMAC,
                                   payload: Array[Byte],
                                   //jku: Option[String], // TODO
@@ -44,12 +46,12 @@ final case class JSONWebSignature(alg: DigitalSignatureOrMAC,
 
 object JSONWebSignature {
 
-  def verify(secretOrKey: Array[Byte], signed: String): Option[JSONWebSignature] = {
+  def verify(secretOrKey: Array[Byte], signed: String): Try[JSONWebSignature] = {
     signed.split('.') match {
       case Array(header, payload, signature , _*) => for (
-        json     <- JsonParser.parse(new String(decoded(header), "UTF-8"));
-        map      <- json.as[Map[String, String]];
-        key      <- map.get("alg");
+        json     <- toTry(JsonParser.parse(new String(decoded(header), "UTF-8")), "Failed parsing JOSE header");
+        map      <- toTry(json.as[Map[String, String]], "Failed converting JOSE header to a Map[String, String]");
+        key      <- toTry(map.get("alg"), "Missing algorithm key in header");
         alg      <- DigitalSignatureOrMAC.fromString(key);
         verified <- alg.verify(secretOrKey, s"$header.$payload".getBytes("UTF-8"), decoded(signature))
       ) yield JSONWebSignature(
@@ -58,12 +60,15 @@ object JSONWebSignature {
         cty     = map.get("cty"),
         payload = decoded(payload)
       )
-      case n => None
+      case n => Failure(new Exception("JWT token invalidly formatted"))
     }
-
   }
 
-  def verify(secretOrKey: String, signed: String): Option[JSONWebSignature] = {
+  private def toTry[A](item: Option[A], message: String): Try[A] = {
+    item.map(n => Success(n)).getOrElse(new Failure(new Exception(message)))
+  }
+
+  def verify(secretOrKey: String, signed: String): Try[JSONWebSignature] = {
     verify(secretOrKey.getBytes("UTF-8"), signed)
   }
 
