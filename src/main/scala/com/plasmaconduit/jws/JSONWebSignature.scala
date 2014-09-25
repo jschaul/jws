@@ -96,20 +96,15 @@ object JSONWebSignature {
   def decoded(string: String): Array[Byte] = {
     val decoder = new BASE64Decoder()
     val diff    = string.length % 4
-    if (diff == 0) {
-      decoder.decodeBuffer(string)
-    } else {
-      val padSize = 4 - diff
-      val padded  = string + ("=" * padSize)
-      val swapped = padded.foldLeft("") {(m, n) =>
-        n match {
-          case '-' => m + "+"
-          case '_' => m + "/"
-          case  c  => m + c
-        }
+    val padded  = if (diff == 0) string else string + ("=" * (4 - diff))
+    val swapped = padded.foldLeft("") {(m, n) =>
+      n match {
+        case '-' => m + "+"
+        case '_' => m + "/"
+        case  c  => m + c
       }
-      decoder.decodeBuffer(swapped)
     }
+    decoder.decodeBuffer(swapped)
   }
 
 }
