@@ -4,6 +4,7 @@ import com.plasmaconduit.json._
 import com.plasmaconduit.jwa._
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
+import scala.util.control.NoStackTrace
 import scala.util.{Try, Success, Failure}
 
 final case class JSONWebSignature(alg: DigitalSignatureOrMAC,
@@ -44,28 +45,27 @@ final case class JSONWebSignature(alg: DigitalSignatureOrMAC,
 
 }
 
+object JWSInvalidFormatException extends NoStackTrace
+object JWSMissingAlgorithmKeyException extends NoStackTrace
+
 object JSONWebSignature {
 
   def verify(secretOrKey: Array[Byte], signed: String): Try[JSONWebSignature] = {
     signed.split('.') match {
-      case Array(header, payload, signature , _*) => for (
-        json     <- toTry(JsonParser.parse(new String(decoded(header), "UTF-8")), "Failed parsing JOSE header");
-        map      <- toTry(json.as[Map[String, String]], "Failed converting JOSE header to a Map[String, String]");
-        key      <- toTry(map.get("alg"), "Missing algorithm key in header");
-        alg      <- DigitalSignatureOrMAC.fromString(key);
+      case Array(header, payload, signature , _*) => for {
+        json     <- JsonParser.parse(new String(decoded(header), "UTF-8"))
+        map      <- json.as[Map[String, String]]
+        key      <- map.get("alg").map(n => Success(n)).getOrElse(new Failure(JWSMissingAlgorithmKeyException))
+        alg      <- DigitalSignatureOrMAC.fromString(key)
         verified <- alg.verify(secretOrKey, s"$header.$payload".getBytes("UTF-8"), decoded(signature))
-      ) yield JSONWebSignature(
+      } yield JSONWebSignature(
         alg     = alg,
         typ     = map.get("typ"),
         cty     = map.get("cty"),
         payload = decoded(payload)
       )
-      case n => Failure(new Exception("JWT token invalidly formatted"))
+      case n => Failure(JWSInvalidFormatException)
     }
-  }
-
-  private def toTry[A](item: Option[A], message: String): Try[A] = {
-    item.map(n => Success(n)).getOrElse(new Failure(new Exception(message)))
   }
 
   def verify(secretOrKey: String, signed: String): Try[JSONWebSignature] = {

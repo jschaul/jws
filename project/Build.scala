@@ -17,12 +17,12 @@ object Build extends Build {
     .settings(
       name                := "jws",
       organization        := "com.plasmaconduit",
-      version             := "0.10.0",
+      version             := "0.11.0",
       scalaVersion        := "2.11.2",
       licenses            += ("MIT", url("http://opensource.org/licenses/MIT")),
       resolvers           += "Plasma Conduit Repository" at "http://dl.bintray.com/plasmaconduit/releases",
-      libraryDependencies += "com.plasmaconduit" %% "json" % "0.5.0",
-      libraryDependencies += "com.plasmaconduit" %% "jwa" % "0.6.0"
+      libraryDependencies += "com.plasmaconduit" %% "json" % "0.6.0",
+      libraryDependencies += "com.plasmaconduit" %% "jwa" % "0.7.0"
     )
 
 }
