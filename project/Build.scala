@@ -17,7 +17,7 @@ object Build extends Build {
     .settings(
       name                := "jws",
       organization        := "com.plasmaconduit",
-      version             := "0.11.0",
+      version             := "0.12.0",
       scalaVersion        := "2.11.2",
       scalacOptions       += "-feature",
       scalacOptions       += "-deprecation",
