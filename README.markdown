@@ -13,6 +13,6 @@ Install
 
 Add the following to your `Build.scala`
 ```
-resolvers += "Plasma Conduit Repository" at "http://dl.bintray.com/plamsaconduit/releases",
+resolvers += "Plasma Conduit Repository" at "http://dl.bintray.com/plasmaconduit/releases",
 libraryDependencies += "com.plasmaconduit" %% "jws" % "0.12.0"
 ```
